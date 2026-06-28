@@ -566,12 +566,11 @@ h1 span {
   <script>
 (() => {
   const TOTAL_SECONDS = 60;
-  let remaining = TOTAL_SECONDS;
+  const CYCLE_SECONDS = TOTAL_SECONDS + 1;
+  let startedAt = Date.now();
+  let timerLoop = null;
 
   const root = document.documentElement;
-  const minutesEl = document.getElementById("minutes");
-  const secondsEl = document.getElementById("seconds");
-  const parallax = document.querySelector("[data-parallax]");
 
   const pad = (value) => String(value).padStart(2, "0");
 
@@ -584,7 +583,13 @@ h1 span {
     window.setTimeout(() => card.classList.remove("is-changing"), 180);
   };
 
-  const renderTimer = () => {
+  const getRemaining = () => {
+    const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+    return TOTAL_SECONDS - (elapsed % CYCLE_SECONDS);
+  };
+
+  const renderTimer = (minutesEl, secondsEl) => {
+    const remaining = getRemaining();
     const minutes = Math.floor(remaining / 60);
     const seconds = remaining % 60;
     const nextMinutes = pad(minutes);
@@ -601,11 +606,6 @@ h1 span {
     }
   };
 
-  const tick = () => {
-    remaining = remaining <= 0 ? TOTAL_SECONDS : remaining - 1;
-    renderTimer();
-  };
-
   const addRipple = (event) => {
     const button = event.currentTarget;
     const rect = button.getBoundingClientRect();
@@ -617,40 +617,58 @@ h1 span {
     ripple.addEventListener("animationend", () => ripple.remove(), { once: true });
   };
 
-  const updateParallax = (x = 0, y = 0) => {
+  const updateParallax = (parallax, x = 0, y = 0) => {
     if (!parallax) return;
     parallax.style.transform = `translate3d(${x}px, ${y}px, 0) scale(1.08)`;
   };
 
-  const handlePointerMove = (event) => {
+  const handlePointerMove = (parallax, event) => {
     const width = window.innerWidth || 1;
     const height = window.innerHeight || 1;
     const x = ((event.clientX / width) - 0.5) * -10;
     const y = ((event.clientY / height) - 0.5) * -12;
-    window.requestAnimationFrame(() => updateParallax(x, y));
+    window.requestAnimationFrame(() => updateParallax(parallax, x, y));
   };
 
-  const handleScroll = () => {
+  const handleScroll = (parallax) => {
     const y = Math.min(window.scrollY * -0.08, 0);
-    window.requestAnimationFrame(() => updateParallax(0, y));
+    window.requestAnimationFrame(() => updateParallax(parallax, 0, y));
   };
 
-  window.addEventListener("DOMContentLoaded", () => {
+  const init = () => {
+    const minutesEl = document.getElementById("minutes");
+    const secondsEl = document.getElementById("seconds");
+    const parallax = document.querySelector("[data-parallax]");
+
+    if (!minutesEl || !secondsEl) return;
+
     document.body.classList.add("is-ready");
-    renderTimer();
-    window.setInterval(tick, 1000);
+    renderTimer(minutesEl, secondsEl);
+
+    window.clearInterval(timerLoop);
+    timerLoop = window.setInterval(() => renderTimer(minutesEl, secondsEl), 250);
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) renderTimer(minutesEl, secondsEl);
+    });
 
     document.querySelectorAll(".cta").forEach((button) => {
       button.addEventListener("pointerdown", addRipple);
     });
 
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      window.addEventListener("pointermove", handlePointerMove, { passive: true });
-      window.addEventListener("scroll", handleScroll, { passive: true });
+      window.addEventListener("pointermove", (event) => handlePointerMove(parallax, event), { passive: true });
+      window.addEventListener("scroll", () => handleScroll(parallax), { passive: true });
     }
 
     root.style.setProperty("--loaded", "1");
-  });
+  };
+
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
 })();
 
 </script>
