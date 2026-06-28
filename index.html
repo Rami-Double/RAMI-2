@@ -1,5 +1,5 @@
 ﻿<!doctype html>
-<!-- build: rami-one-screen-atualizado-2026-06-28-rami-centralizado -->
+<!-- build: rami-one-screen-atualizado-2026-06-28-mobile-fix -->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
@@ -159,7 +159,7 @@ a {
 
 .rami {
   position: absolute;
-  inset: 42px -20px auto;
+  inset: 42px 0 auto;
   z-index: 0;
   width: 100%;
   height: min(52svh, 430px);
@@ -172,7 +172,7 @@ a {
 
 .rami__glow {
   position: absolute;
-  width: min(110%, 520px);
+  width: min(104%, 500px);
   height: 72%;
   top: 22%;
   border-radius: 999px;
@@ -185,12 +185,11 @@ a {
 .rami img {
   position: relative;
   z-index: 1;
-  width: min(116%, 560px);
+  width: min(108%, 520px);
   height: 100%;
   display: block;
   object-fit: cover;
-  object-position: center 16%;
-  transform: translateX(clamp(-22px, -4vw, -12px));
+  object-position: 50% 16%;
   border: 0;
   border-radius: 0;
   opacity: 0.78;
@@ -240,25 +239,12 @@ a {
 
 .number-stream {
   position: relative;
-  width: 100%;
+  width: min(100%, 346px);
   display: flex;
   justify-content: center;
   gap: 7px;
-  padding-bottom: 6px;
-  overflow: hidden;
-  border-radius: 12px;
-}
-
-.number-stream::after {
-  content: "";
-  position: absolute;
-  inset: -8px auto 0;
-  width: 68px;
-  background: linear-gradient(110deg, transparent 18%, rgba(255, 255, 255, 0.55), transparent 72%);
-  transform: translateX(-210%) skewX(-12deg);
-  mix-blend-mode: screen;
-  animation: chipSweep 2.1s ease-in-out infinite;
-  pointer-events: none;
+  padding: 0 8px 6px;
+  overflow: visible;
 }
 
 .double-chip {
@@ -541,11 +527,6 @@ h1 span {
   }
 }
 
-@keyframes chipSweep {
-  0% { transform: translateX(-210%) skewX(-12deg); }
-  52%, 100% { transform: translateX(210%) skewX(-12deg); }
-}
-
 @keyframes lineGlow {
   0%, 100% { opacity: 0.35; transform: scaleX(0.72); }
   50% { opacity: 1; transform: scaleX(1); }
@@ -638,7 +619,7 @@ h1 span {
   }
 
   .rami img {
-    width: min(118%, 520px);
+    width: min(108%, 500px);
   }
 
   .signal-board {
