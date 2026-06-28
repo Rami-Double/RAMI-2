@@ -1,0 +1,55 @@
+(() => {
+  const root = document.documentElement;
+
+  const addRipple = (event) => {
+    const button = event.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const ripple = document.createElement("span");
+    ripple.className = "ripple";
+    ripple.style.left = `${event.clientX - rect.left}px`;
+    ripple.style.top = `${event.clientY - rect.top}px`;
+    button.appendChild(ripple);
+    ripple.addEventListener("animationend", () => ripple.remove(), { once: true });
+  };
+
+  const updateParallax = (parallax, x = 0, y = 0) => {
+    if (!parallax) return;
+    parallax.style.transform = `translate3d(${x}px, ${y}px, 0) scale(1.08)`;
+  };
+
+  const handlePointerMove = (parallax, event) => {
+    const width = window.innerWidth || 1;
+    const height = window.innerHeight || 1;
+    const x = ((event.clientX / width) - 0.5) * -10;
+    const y = ((event.clientY / height) - 0.5) * -12;
+    window.requestAnimationFrame(() => updateParallax(parallax, x, y));
+  };
+
+  const handleScroll = (parallax) => {
+    const y = Math.min(window.scrollY * -0.08, 0);
+    window.requestAnimationFrame(() => updateParallax(parallax, 0, y));
+  };
+
+  const init = () => {
+    const parallax = document.querySelector("[data-parallax]");
+
+    document.body.classList.add("is-ready");
+
+    document.querySelectorAll(".cta").forEach((button) => {
+      button.addEventListener("pointerdown", addRipple);
+    });
+
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      window.addEventListener("pointermove", (event) => handlePointerMove(parallax, event), { passive: true });
+      window.addEventListener("scroll", () => handleScroll(parallax), { passive: true });
+    }
+
+    root.style.setProperty("--loaded", "1");
+  };
+
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+})();
